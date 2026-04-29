@@ -1,0 +1,5 @@
+- name: Install Docker di semua node
+  hosts: all
+  become: yes
+  roles:
+    - docker_install
