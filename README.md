@@ -1,9 +1,9 @@
 # TKA_A04 MODUL 3
 
 ## Praktikan 1 (Dina Rahmadani - 5027241065)
-- Membuat inventory.yml
-- membuat playbook.yml
-- membuat roles/docker_install/tasks/main.yml
+- Membuat `inventory.yml`
+- membuat `playbook.yml`
+- membuat `roles/docker_install/tasks/main.yml`
 
 #### Setup
 1. Membuat Virtual Machine
@@ -48,7 +48,7 @@ ansible-playbook -i inventory.yml playbook.yml
 
 ## Praktikan 2 (Ica Zika Hamizah - 5027241058)
 - Membuat folder `backend_setup`
-- Update playbook.yml
+- Update `playbook.yml`
 
 ### Setup
 1. Buat File Kredensial Rahasia (Ansible Vault)
