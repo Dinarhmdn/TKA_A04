@@ -1,0 +1,61 @@
+---
+- name: Membuka port backend sesuai backend_port (UFW)
+  ufw:
+    rule: allow
+    port: "{{ backend_port }}"
+    proto: tcp
+
+- name: Buat direktori aplikasi backend di server
+  file:
+    path: /home/ubuntu/backend_app/src
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+
+- name: Salin source code backend dari WSL ke VM
+  copy:
+    src: src/
+    dest: /home/ubuntu/backend_app/src/
+
+- name: Salin Dockerfile ke server
+  copy:
+    src: Dockerfile
+    dest: /home/ubuntu/backend_app/Dockerfile
+
+- name: Inject template docker-compose.yml (Jinja2)
+  template:
+    src: docker-compose.yml.j2
+    dest: /home/ubuntu/backend_app/docker-compose.yml
+
+- name: Inject template .env (Jinja2)
+  template:
+    src: .env.j2
+    dest: /home/ubuntu/backend_app/.env
+
+- name: Matikan container lama jika ada
+  shell: docker compose down
+  args:
+    chdir: /home/ubuntu/backend_app
+  ignore_errors: yes
+
+- name: Mampu menyalakan backend dengan Docker Compose
+  shell: docker compose up -d --build
+  args:
+    chdir: /home/ubuntu/backend_app
+
+- name: Tunggu backend menyala (15 Detik)
+  pause:
+    seconds: 15
+
+- name: Health check menggunakan perintah "uri"
+  uri:
+    url: "http://localhost:{{ backend_port }}"
+    method: GET
+    return_content: yes
+    status_code: [200, 201, 404]
+  register: result_healthcheck
+
+- name: Tampilkan pesan Health Check sukses
+  debug:
+    msg: "Health check berhasil! Status code: {{ result_healthcheck.status }}"

@@ -3,3 +3,11 @@
   become: yes
   roles:
     - docker_install
+    
+- name: Setup Backend dan Database di Node 1
+  hosts: node1
+  become: yes
+  vars_files:
+    - secrets.yml
+  roles:
+    - backend_setup
