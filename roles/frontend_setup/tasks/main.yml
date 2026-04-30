@@ -1,0 +1,61 @@
+---
+- name: Membuka port frontend sesuai frontend_port (UFW)
+  ufw:
+    rule: allow
+    port: "{{ frontend_port }}"
+    proto: tcp
+
+- name: Buat direktori aplikasi frontend di server
+  file:
+    path: /home/ubuntu/frontend_app/src
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+
+- name: Salin source code frontend dari WSL ke VM
+  copy:
+    src: src/
+    dest: /home/ubuntu/frontend_app/src/
+
+- name: Salin Dockerfile ke server
+  copy:
+    src: Dockerfile
+    dest: /home/ubuntu/frontend_app/Dockerfile
+
+- name: Inject template config.js (Jinja2)
+  template:
+    src: config.js.j2
+    dest: /home/ubuntu/frontend_app/src/config.js
+
+- name: Inject template docker-compose.yml (Jinja2)
+  template:
+    src: docker-compose.yml.j2
+    dest: /home/ubuntu/frontend_app/docker-compose.yml
+
+- name: Matikan container lama jika ada
+  shell: docker compose down
+  args:
+    chdir: /home/ubuntu/frontend_app
+  ignore_errors: yes
+
+- name: Mampu menyalakan frontend dengan Docker Compose
+  shell: docker compose up -d --build
+  args:
+    chdir: /home/ubuntu/frontend_app
+
+- name: Tunggu frontend menyala (10 Detik)
+  pause:
+    seconds: 10
+
+- name: Health check menggunakan perintah "uri"
+  uri:
+    url: "http://localhost:{{ frontend_port }}"
+    method: GET
+    return_content: yes
+    status_code: [200, 201, 304]
+  register: result_healthcheck
+
+- name: Tampilkan pesan Health Check sukses
+  debug:
+    msg: "Health check berhasil! Status code: {{ result_healthcheck.status }}"

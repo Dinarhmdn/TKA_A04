@@ -3,13 +3,17 @@ all:
     node1:
       hosts:
         vm1:
-          ansible_host: 192.168.1.20
+          ansible_host: 10.60.127.224
           ansible_user: ubuntu
           ansible_ssh_private_key_file: ~/.ssh/id_rsa
 
     node2:
       hosts:
         vm2:
-          ansible_host: 192.168.1.30
+          ansible_host: 10.60.127.28
           ansible_user: ubuntu
           ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      vars:
+        frontend_port: 8080
+        backend_url: "http://localhost:3000"
+        # backend_url: "http://{{ hostvars['vm1']['ansible_host'] }}:{{ backend_port | default('5000') }}"

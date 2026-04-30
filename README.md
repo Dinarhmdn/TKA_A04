@@ -32,8 +32,9 @@ multipass.exe exec vm2 -- bash -c "echo '$(cat ~/.ssh/id_rsa.pub)' >> ~/.ssh/aut
 ### Cek
 
 #### Uji Koneksi Node (Ping Test)
+> **Note:** File `ansible.cfg` sudah ditambahkan untuk menonaktifkan `host_key_checking`.
 ```sh
-ansible all -i inventory.yml -m ping
+ansible all -m ping
 ```
 
 #### Eksekusi Playbook (Pemasangan Docker & Firewall)
@@ -83,3 +84,24 @@ docker ps
 ```
 
 ## Praktikan 3 (Ahmad Rafi Fadhillah Dwiputra - 5027241068)
+- Membuat folder `frontend_setup` di dalam `roles/`
+- Membuat template `docker-compose.yml.j2` dan `config.js.j2`
+- Menambahkan konfigurasi port dan url di `inventory.yml`
+- Update `playbook.yml` untuk memanggil role `frontend_setup` di `node2`
+
+### Setup & Eksekusi Playbook
+1. Jalankan playbook seperti biasa, pastikan password vault sama dengan yang dibuat oleh Praktikan 2:
+```sh
+ansible-playbook -i inventory.yml playbook.yml --ask-vault-pass
+```
+
+### Cek & Testing Frontend
+Gunakan SSH Tunneling di terminal WSL untuk menembus isu *Double Layer Virtualization*:
+1. **Tunnel Frontend:** `ssh -L 8080:localhost:8080 ubuntu@<IP_VM2>`
+2. **Tunnel Backend:** `ssh -L 3000:localhost:3000 ubuntu@<IP_VM1>`
+
+**Skenario Test (Browser: `localhost:8080`):**
+- Register user baru (Berhasil)
+- Register user sama (Gagal)
+- Login salah password (Gagal)
+- Login berhasil (Berhasil + Token JWT)
